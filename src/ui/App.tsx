@@ -1,5 +1,6 @@
 import type { Route } from '@/lib/routes';
 import { Footer } from './Chrome';
+import { DataCheck } from './DataCheck';
 
 type Props = { route: Extract<Route, { kind: 'home' | 'lots' | 'selling' }> };
 
@@ -33,6 +34,8 @@ export function App({ route }: Props) {
           {TITLES[route.kind]}
           {auctionId && ` for auction ${auctionId}`}. The MGA page is hidden underneath and still works.
         </p>
+        <h2>What CGA read</h2>
+        <DataCheck route={route} />
       </main>
       <Footer />
     </div>

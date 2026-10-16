@@ -93,7 +93,7 @@ Lists **only the current user's** items for that auction. Grid columns: Lot #, I
 - `…$CopyIB` (image input, confirm "Are you sure you want to copy this item?")
 - edit: `javascript:openAuctionItem(<auctionItemId>, <auctionId>)`
 - "Add new Item": `openAuctionItem(0, <auctionId>)`; hidden `RefreshAuctionItemListBtn` reloads the list after the dialog closes.
-- Upcoming auctions show the add link; past auctions do not (`lnkAddItem` absent). Past auction 963 (PVAS Fall, Oct 3) had 13 of the user's items, e.g. lot 742 "6x Juvie Red Kribs (Pelvicachromis pulcher "Red") *Picture of mother", $0.00, 1 photo, auctionItemId 146356.
+- Home links `auction-items.aspx` only for upcoming auctions, but the Selling page itself still shows "Add new Item" (`lnkAddItem_Text`, `openAuctionItem(0, N)`) when opened directly for a past auction (seen on 963, Oct 16). Decide upcoming from Home, not from this link. **UNVERIFIED** whether adding to a past auction is accepted. Past auction 963 (PVAS Fall, Oct 3) had 13 of the user's items, e.g. lot 742 "6x Juvie Red Kribs (Pelvicachromis pulcher "Red") *Picture of mother", $0.00, 1 photo, auctionItemId 146356.
 
 `openAuctionItem` opens a RadWindow at
 `dialogs/AuctionItem.aspx?auctionItemId=<id>&auctionId=<auctionId>&mode=user`.

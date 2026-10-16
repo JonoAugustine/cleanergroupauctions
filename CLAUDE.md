@@ -18,7 +18,8 @@ Read `SPEC.md` before doing anything. It holds the product decisions and everyth
 - `src/entrypoints/background.ts`: only opens the options page for content scripts
 - `src/lib/routes.ts`: URL to screen mapping (SPEC.md §2 routes); `src/lib/settings.ts`: Settings in `storage.local`
 - `src/ui/`: Preact components and `tokens.css`
-- `src/mga/`: MGA parsers (milestone 2)
+- `src/mga/`: MGA data layer. `parse.ts` (pure parsers taking a Document; `toDoc(html)` for strings), `client.ts` (same origin fetch, login redirect detection, postbacks, load all), `grid.ts` (RadGrid rows by header text), `text.ts`, `types.ts`
+- `scripts/scrub-fixture.mjs`: turns a saved MGA page into a committable fixture; raw saves go in `tests/fixtures/raw/` (ignored)
 - Shadow root gotcha: WXT sets `all: initial` on the host, so base text styles live on `.cga-root`, not `:host`.
 
 ## Hard rules

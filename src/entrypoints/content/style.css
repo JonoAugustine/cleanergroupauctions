@@ -69,6 +69,20 @@
   margin: 0 0 8px;
 }
 
+.main h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  margin: 32px 0 8px;
+}
+
+.check {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
 .muted {
   color: var(--fg-muted);
 }
