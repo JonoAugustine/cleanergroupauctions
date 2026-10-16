@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         MyGroupAuctions Plus
-// @namespace    https://pinkilo.com/
+// @namespace    https://github.com/JonoAugustine
 // @version      1.1.0
 // @description  Loads every lot on one page and adds search, filters, sorting, card view, photo lightbox, watchlist with notes, and bulk select for printing.
-// @author       Jonathan Augustine
+// @author       JonoAugustine
 // @match        https://mygroupauctions.com/preview-auction.aspx*
 // @match        https://www.mygroupauctions.com/preview-auction.aspx*
 // @grant        GM_getValue
