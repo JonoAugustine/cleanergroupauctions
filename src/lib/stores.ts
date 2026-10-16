@@ -12,3 +12,11 @@ export const lotKey = (auctionId: string, lot: string): LotKey => `${auctionId}:
 
 export const watchItem = storage.defineItem<Watch>('local:watch', { fallback: {} });
 export const hiddenItem = storage.defineItem<Hidden>('local:hidden', { fallback: {} });
+
+export type SavedSearch = { id: string; q: string; createdAt: number };
+
+/** Saved searches, synced and backed up with the watchlist. */
+export const searchesItem = storage.defineItem<SavedSearch[]>('local:searches', { fallback: [] });
+
+/** Lot numbers seen at the last visit to each auction's Lots screen, for "new" flags. Per browser. */
+export const seenItem = storage.defineItem<Record<string, string[]>>('local:seen', { fallback: {} });

@@ -13,10 +13,11 @@ type Props = {
   open: (lot: string) => void;
   selected: Set<string>;
   toggleSelected: (lot: string) => void;
+  isNew: Set<string>;
 };
 
 /** Dense list. On phones the same rows fold into two lines. */
-export function LotList({ lots, auctionId, terms, current, open, selected, toggleSelected }: Props) {
+export function LotList({ lots, auctionId, terms, current, open, selected, toggleSelected, isNew }: Props) {
   return (
     <div class="list" role="table" aria-label="Lots">
       <div class="list-row list-head" role="row">
@@ -57,6 +58,7 @@ export function LotList({ lots, auctionId, terms, current, open, selected, toggl
             </span>
             <span role="cell" class="c-lot">
               {l.lot}
+              {isNew.has(l.lot) && <span class="new-badge inline">New</span>}
             </span>
             <span role="cell" class="c-img">
               <Photo src={l.imageSrc} size={48} label="" />

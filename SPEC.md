@@ -229,6 +229,6 @@ Lot numbers are stable within an auction once assigned. If a lot's title changes
 8. **Later**: history from PDF reports; print friendly watchlist.
 
 ## 8. Open questions for the author
-- The visual tokens above were adapted from a private design system the author owns. Confirm it is fine to publish these values in a public repo (they are generic colors and open fonts, but confirm).
+- ~~Confirm the visual tokens can be published.~~ Confirmed by the author on Oct 16, 2026.
 - Approve a throwaway test item in an upcoming auction (and its deletion) to capture save, upload, copy and delete responses.
 - Store listing copy and icon.

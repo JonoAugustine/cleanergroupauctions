@@ -1,5 +1,5 @@
 import type { Settings } from './settings';
-import type { Hidden, Watch } from './userdata';
+import type { Hidden, SavedSearch, Watch } from './stores';
 
 /**
  * storage.sync is small (about 100 KB in all, 8 KB per item on Chrome), so data is split into one item
@@ -9,7 +9,7 @@ import type { Hidden, Watch } from './userdata';
 export type SyncedSettings = Pick<Settings, 'accent' | 'bg' | 'watch' | 'newBadge' | 'donations' | 'view'>;
 export const SYNCED_SETTINGS = ['accent', 'bg', 'watch', 'newBadge', 'donations', 'view'] as const;
 
-export function toSyncItems(watch: Watch, hidden: Hidden, settings: Settings): Record<string, unknown> {
+export function toSyncItems(watch: Watch, hidden: Hidden, settings: Settings, searches: SavedSearch[] = []): Record<string, unknown> {
   const items: Record<string, unknown> = {};
   const put = (prefix: string, key: string, value: unknown) => {
     const [auction, lot] = splitKey(key);
@@ -19,6 +19,7 @@ export function toSyncItems(watch: Watch, hidden: Hidden, settings: Settings): R
   for (const [k, v] of Object.entries(watch)) put('w', k, v);
   for (const k of Object.keys(hidden)) put('h', k, 1);
   items.settings = Object.fromEntries(SYNCED_SETTINGS.map((k) => [k, settings[k]]));
+  items.searches = searches;
   return items;
 }
 
@@ -34,7 +35,8 @@ export function fromSyncItems(items: Record<string, unknown>) {
     }
   }
   const settings = (items.settings ?? null) as Partial<SyncedSettings> | null;
-  return { watch, hidden, settings };
+  const searches = Array.isArray(items.searches) ? (items.searches as SavedSearch[]) : null;
+  return { watch, hidden, settings, searches };
 }
 
 export const isDataItem = (key: string) => /^[wh]:\d+$/.test(key);

@@ -5,9 +5,9 @@ import { Icon } from '../Icon';
 import { Photo } from './Photo';
 import { Title } from './Title';
 
-type Props = { lots: Lot[]; auctionId: string; terms: string[]; current: string | null; open: (lot: string) => void };
+type Props = { lots: Lot[]; auctionId: string; terms: string[]; current: string | null; open: (lot: string) => void; isNew: Set<string> };
 
-export function LotGrid({ lots, auctionId, terms, current, open }: Props) {
+export function LotGrid({ lots, auctionId, terms, current, open, isNew }: Props) {
   return (
     <ul class="cards">
       {lots.map((l) => {
@@ -18,6 +18,7 @@ export function LotGrid({ lots, auctionId, terms, current, open }: Props) {
               <span class="card-img">
                 <Photo src={l.imageSrc} size={600} />
                 <span class="lot-badge">{l.lot}</span>
+                {isNew.has(l.lot) && <span class="new-badge">New</span>}
               </span>
               <span class="card-body">
                 <span class="card-title">

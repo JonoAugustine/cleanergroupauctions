@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS, type Settings } from './settings';
 import { isHex } from './theme';
-import type { Hidden, Watch, WatchEntry } from './userdata';
+import type { Hidden, SavedSearch, Watch, WatchEntry } from './stores';
 
 export const BACKUP_APP = 'CleanerGroupAuctions';
 
@@ -11,15 +11,17 @@ export type Backup = {
   settings: Settings;
   watch: Watch;
   hidden: Hidden;
+  searches: SavedSearch[];
 };
 
-export const makeBackup = (settings: Settings, watch: Watch, hidden: Hidden): Backup => ({
+export const makeBackup = (settings: Settings, watch: Watch, hidden: Hidden, searches: SavedSearch[] = []): Backup => ({
   app: BACKUP_APP,
   version: 1,
   exportedAt: new Date().toISOString(),
   settings,
   watch,
   hidden,
+  searches,
 });
 
 const LOT_KEY = /^\d+:[^:\s]+$/;
@@ -56,7 +58,18 @@ export function parseBackup(text: string): Backup {
   const hidden: Hidden = {};
   for (const [k, v] of Object.entries(isObj(raw.hidden) ? raw.hidden : {})) if (LOT_KEY.test(k) && v === true) hidden[k] = true;
 
-  return { app: BACKUP_APP, version: 1, exportedAt: str(raw.exportedAt, 40) ?? '', settings, watch, hidden };
+  const searches: SavedSearch[] = [];
+  for (const v of Array.isArray(raw.searches) ? raw.searches : []) {
+    const q = isObj(v) ? str(v.q, 200)?.trim() : undefined;
+    if (!q || searches.some((s) => s.q === q)) continue;
+    searches.push({
+      id: str((v as Record<string, unknown>).id, 64) || crypto.randomUUID(),
+      q,
+      createdAt: Number((v as Record<string, unknown>).createdAt) || 0,
+    });
+  }
+
+  return { app: BACKUP_APP, version: 1, exportedAt: str(raw.exportedAt, 40) ?? '', settings, watch, hidden, searches };
 }
 
 /** Union of two watchlists; where both have a lot, the more recently changed entry wins. */
@@ -67,3 +80,6 @@ export function mergeWatch(a: Watch, b: Watch): Watch {
 }
 
 export const mergeHidden = (a: Hidden, b: Hidden): Hidden => ({ ...a, ...b });
+
+/** Saved searches from both, one per query text. */
+export const mergeSearches = (a: SavedSearch[], b: SavedSearch[]) => [...a, ...b.filter((s) => !a.some((x) => x.q === s.q))];

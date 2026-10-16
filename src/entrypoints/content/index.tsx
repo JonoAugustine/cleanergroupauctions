@@ -10,6 +10,7 @@ import { applyTheme } from '@/lib/theme';
 import { App } from '@/ui/App';
 import { CgaBar, UseCgaPill } from '@/ui/Chrome';
 import './lots.css';
+import './home.css';
 
 const HOST = 'cga-app';
 const TAKEOVER_CLASS = 'cga-takeover';

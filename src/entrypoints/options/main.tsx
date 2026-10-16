@@ -3,14 +3,14 @@ import './style.css';
 import { render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { browser } from 'wxt/browser';
-import { makeBackup, mergeHidden, mergeWatch, parseBackup } from '@/lib/backup';
+import { makeBackup, mergeHidden, mergeSearches, mergeWatch, parseBackup } from '@/lib/backup';
 import { exportFile } from '@/lib/download';
 import { injectFonts } from '@/lib/fonts';
 import { plural } from '@/lib/format';
 import { DEFAULT_SETTINGS, getSettings, updateSettings, watchSettings, type Settings } from '@/lib/settings';
 import { syncStatus } from '@/lib/sync-status';
 import { applyTheme, contrast } from '@/lib/theme';
-import { hiddenItem, watchItem } from '@/lib/userdata';
+import { hiddenItem, searchesItem, watchItem } from '@/lib/stores';
 import { CREDIT } from '@/ui/Chrome';
 import { Icon } from '@/ui/Icon';
 import { ColorField } from './ColorField';
@@ -83,6 +83,12 @@ function Options() {
           </p>
         )}
         <Switch
+          label="Flag new lots"
+          hint="Mark lots added since your last visit to an auction's lots."
+          checked={s.newBadge}
+          onChange={(newBadge) => set({ newBadge })}
+        />
+        <Switch
           label="Show donated lots"
           hint="Include donated lots in the catalog by default."
           checked={s.donations}
@@ -133,7 +139,7 @@ function YourData({ settings }: { settings: Settings }) {
   const file = useRef<HTMLInputElement>(null);
 
   const doExport = async () => {
-    const b = makeBackup(settings, await watchItem.getValue(), await hiddenItem.getValue());
+    const b = makeBackup(settings, await watchItem.getValue(), await hiddenItem.getValue(), await searchesItem.getValue());
     exportFile(`cga-backup-${b.exportedAt.slice(0, 10)}.json`, JSON.stringify(b, null, 2), 'application/json');
   };
 
@@ -144,9 +150,12 @@ function YourData({ settings }: { settings: Settings }) {
       // Merge, never wipe: newest entry wins for lots in both. Classic view and sync stay as they are here.
       await watchItem.setValue(mergeWatch(await watchItem.getValue(), b.watch));
       await hiddenItem.setValue(mergeHidden(await hiddenItem.getValue(), b.hidden));
+      await searchesItem.setValue(mergeSearches(await searchesItem.getValue(), b.searches));
       const { classic, sync, ...rest } = b.settings;
       await updateSettings(rest);
-      setMsg(`Imported ${plural(Object.keys(b.watch).length, 'watched lot')} and ${plural(Object.keys(b.hidden).length, 'hidden lot')}.`);
+      setMsg(
+        `Imported ${plural(Object.keys(b.watch).length, 'watched lot')}, ${plural(Object.keys(b.hidden).length, 'hidden lot')} and ${plural(b.searches.length, 'saved search', 'saved searches')}.`,
+      );
     } catch (e) {
       setMsg(e instanceof Error ? `${e.message}.` : 'Could not read that file.');
     } finally {

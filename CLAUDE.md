@@ -17,8 +17,8 @@ Read `SPEC.md` before doing anything. It holds the product decisions and everyth
 - `src/entrypoints/options/`: Settings page (also the extension options page)
 - `src/entrypoints/background.ts`: opens the options page for content scripts; runs Sync (local is the source of truth, `storage.sync` holds one item per auction, see `src/lib/sync-items.ts`)
 - `src/lib/routes.ts`: URL to screen mapping (SPEC.md §2 routes); `src/lib/settings.ts`: Settings in `storage.local`
-- `src/ui/`: Preact components and `tokens.css`; `src/ui/lots/` is the Lots screen; `Chrome.tsx` holds the shared Shell (header, footer, phone tab bar)
-- `src/lib/`: pure logic with tests: `search.ts` (query syntax), `filters.ts`, `exporters.ts` (CSV, watchlist text), `format.ts`; `userdata.ts` (watch and hidden lots as signals over `storage.local`), `home-cache.ts`, `theme.ts` (swatches, contrast, CSS variables), `backup.ts` (export and import file), `fonts.ts`
+- `src/ui/`: Preact components and `tokens.css`; `src/ui/lots/` is the Lots screen; `src/ui/home/` is Home; `Chrome.tsx` holds the shared Shell (header, footer, phone tab bar)
+- `src/lib/`: pure logic with tests: `search.ts` (query syntax), `filters.ts`, `exporters.ts` (CSV, watchlist text), `format.ts`; `userdata.ts` (watch and hidden lots as signals over `storage.local`), `home-cache.ts`, `lots-source.ts` (other auctions' lots for Home, cached 10 minutes, fetched one auction at a time), `new-lots.ts`, `searches.ts` (saved searches, `lotsLink` with `#q=` / `#lot=`), `theme.ts` (swatches, contrast, CSS variables), `backup.ts` (export and import file), `fonts.ts`
 - Keyboard handlers read state from refs: keys can arrive faster than renders.
 - `src/mga/`: MGA data layer. `parse.ts` (pure parsers taking a Document; `toDoc(html)` for strings), `client.ts` (same origin fetch, login redirect detection, postbacks, load all), `grid.ts` (RadGrid rows by header text), `text.ts`, `types.ts`
 - `scripts/scrub-fixture.mjs`: turns a saved MGA page into a committable fixture; raw saves go in `tests/fixtures/raw/` (ignored)

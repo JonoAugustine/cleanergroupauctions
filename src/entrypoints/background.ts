@@ -1,10 +1,10 @@
 import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
-import { mergeHidden, mergeWatch } from '@/lib/backup';
+import { mergeHidden, mergeSearches, mergeWatch } from '@/lib/backup';
 import { getSettings, updateSettings } from '@/lib/settings';
 import { fromSyncItems, SYNCED_SETTINGS, syncDiff, toSyncItems } from '@/lib/sync-items';
 import { syncStatus } from '@/lib/sync-status';
-import { hiddenItem, watchItem } from '@/lib/stores';
+import { hiddenItem, searchesItem, watchItem, type SavedSearch } from '@/lib/stores';
 
 export default defineBackground(() => {
   // Content scripts cannot open the options page themselves.
@@ -28,7 +28,7 @@ export default defineBackground(() => {
       const after = changes.settings.newValue as { sync?: boolean } | undefined;
       if (after?.sync && !before?.sync) return schedule('join');
     }
-    if (area === 'local' && (changes.watch || changes.hidden || changes.settings)) schedule('push');
+    if (area === 'local' && (changes.watch || changes.hidden || changes.settings || changes.searches)) schedule('push');
     if (area === 'sync') schedule('pull');
   });
 
@@ -42,15 +42,18 @@ export default defineBackground(() => {
       const theirs = fromSyncItems(remote);
       let watch = await watchItem.getValue();
       let hidden = await hiddenItem.getValue();
+      let searches = await searchesItem.getValue();
 
       if (job === 'join') {
         // First sync on this browser: keep both sides, newest entry wins.
         watch = mergeWatch(watch, theirs.watch);
         hidden = mergeHidden(hidden, theirs.hidden);
+        searches = mergeSearches(searches, theirs.searches ?? []);
       } else if (job === 'pull') {
         // Another browser wrote; its copy already includes everything it had merged.
         watch = theirs.watch;
         hidden = theirs.hidden;
+        if (theirs.searches) searches = theirs.searches;
         const patch = Object.fromEntries(
           SYNCED_SETTINGS.filter((k) => theirs.settings?.[k] !== undefined && theirs.settings[k] !== settings[k]).map((k) => [k, theirs.settings![k]]),
         );
@@ -59,8 +62,9 @@ export default defineBackground(() => {
 
       if (JSON.stringify(watch) !== JSON.stringify(await watchItem.getValue())) await watchItem.setValue(watch);
       if (JSON.stringify(hidden) !== JSON.stringify(await hiddenItem.getValue())) await hiddenItem.setValue(hidden);
+      if (JSON.stringify(searches) !== JSON.stringify(await searchesItem.getValue())) await searchesItem.setValue(searches);
 
-      const { set, remove } = syncDiff(remote, toSyncItems(watch, hidden, await getSettings()));
+      const { set, remove } = syncDiff(remote, toSyncItems(watch, hidden, await getSettings(), searches));
       if (remove.length) await browser.storage.sync.remove(remove);
       if (Object.keys(set).length) await browser.storage.sync.set(set);
       await syncStatus.setValue({ at: Date.now(), error: null });

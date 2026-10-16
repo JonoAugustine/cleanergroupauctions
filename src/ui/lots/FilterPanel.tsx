@@ -1,11 +1,13 @@
-import type { Filters, Show, Sort } from '@/lib/filters';
+import type { Counts, Filters, Show, Sort } from '@/lib/filters';
 import { plural } from '@/lib/format';
 import { Icon } from '../Icon';
 
 type Props = {
   filters: Filters;
   set: (patch: Partial<Filters>) => void;
-  counts: Record<Show, number>;
+  counts: Counts;
+  /** False when Flag new lots is off in Settings. */
+  flagNew: boolean;
   resultCount: number;
   labels: {
     count: number;
@@ -31,7 +33,7 @@ const SORTS: [Sort, string][] = [
   ['min', 'Minimum bid'],
 ];
 
-export function FilterPanel({ filters: f, set, counts, resultCount, labels, onClose }: Props) {
+export function FilterPanel({ filters: f, set, counts, flagNew, resultCount, labels, onClose }: Props) {
   return (
     <div class="panel">
       {onClose && (
@@ -56,6 +58,13 @@ export function FilterPanel({ filters: f, set, counts, resultCount, labels, onCl
 
       <fieldset>
         <legend>Only</legend>
+        {flagNew && (
+          <label class="opt">
+            <input type="checkbox" checked={f.newOnly} onChange={(e) => set({ newOnly: e.currentTarget.checked })} />
+            <span>New since last visit</span>
+            <span class="count">{counts.new}</span>
+          </label>
+        )}
         <label class="opt">
           <input type="checkbox" checked={f.photo} onChange={(e) => set({ photo: e.currentTarget.checked })} />
           <span>Has photo</span>

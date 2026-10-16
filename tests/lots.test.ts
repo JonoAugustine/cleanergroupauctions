@@ -70,7 +70,7 @@ describe('filters', () => {
   it('hides hidden lots from All and counts each view', () => {
     const r = applyFilters(LOTS, defaultFilters(), ctx);
     expect(r.lots.map((l) => l.lotNum)).toEqual([100, 120, 121, 143, 493]);
-    expect(r.counts).toEqual({ all: 5, watched: 2, hidden: 1 });
+    expect(r.counts).toEqual({ all: 5, watched: 2, hidden: 1, new: 0 });
   });
   it('shows watched and hidden views', () => {
     expect(run({ show: 'watched' })).toEqual([121, 143]);
@@ -80,6 +80,11 @@ describe('filters', () => {
     expect(run({ photo: true })).toEqual([100]);
     expect(run({ noMin: true })).toEqual([100, 120, 143, 493]);
     expect(run({ donations: false })).toEqual([100, 120, 121, 493]);
+  });
+  it('shows only new lots', () => {
+    const r = applyFilters(LOTS, { ...defaultFilters(), newOnly: true }, { ...ctx, isNew: new Set(['143', '150']) });
+    expect(r.lots.map((l) => l.lotNum)).toEqual([143]);
+    expect(r.counts.new).toBe(1);
   });
   it('sorts by name and minimum', () => {
     expect(run({ sort: 'name' })).toEqual([143, 120, 121, 493, 100]);
@@ -120,5 +125,22 @@ describe('format', () => {
     expect(cleanMax(' $30 ')).toBe('30');
     expect(cleanMax('12.5')).toBe('12.5');
     expect(cleanMax('lots')).toBe('');
+  });
+});
+
+describe('new lots', async () => {
+  const { newLots } = await import('@/lib/new-lots');
+  it('flags lots not seen last time, and nothing on a first visit', () => {
+    expect([...newLots(LOTS, ['100', '120', '121'])]).toEqual(['143', '150', '493']);
+    expect(newLots(LOTS, undefined).size).toBe(0);
+  });
+});
+
+describe('lots links', async () => {
+  const { lotsLink } = await import('@/lib/searches');
+  it('puts search and lot in the hash', () => {
+    expect(lotsLink('951')).toBe('/preview-auction.aspx?id=951');
+    expect(lotsLink('951', { q: 'pleco "group of 6"' })).toBe('/preview-auction.aspx?id=951#q=pleco+%22group+of+6%22');
+    expect(lotsLink('951', { lot: '143' })).toBe('/preview-auction.aspx?id=951#lot=143');
   });
 });

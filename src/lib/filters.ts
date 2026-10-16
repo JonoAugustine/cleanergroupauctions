@@ -3,6 +3,7 @@ import { isEmptyQuery, matchQuery, parseQuery, type Query } from './search';
 import { lotKey, type Hidden, type Watch } from './userdata';
 
 export type Show = 'all' | 'watched' | 'hidden';
+export type Counts = Record<Show | 'new', number>;
 export type Sort = 'lot' | 'name' | 'min';
 
 export type Filters = {
@@ -11,6 +12,8 @@ export type Filters = {
   photo: boolean;
   noMin: boolean;
   donations: boolean;
+  /** Only lots added since the last visit. */
+  newOnly: boolean;
   sort: Sort;
 };
 
@@ -20,15 +23,16 @@ export const defaultFilters = (donations = true): Filters => ({
   photo: false,
   noMin: false,
   donations,
+  newOnly: false,
   sort: 'lot',
 });
 
-export type Ctx = { auctionId: string; watch: Watch; hidden: Hidden };
+export type Ctx = { auctionId: string; watch: Watch; hidden: Hidden; isNew?: Set<string> };
 
 export type Result = {
   lots: Lot[];
   query: Query;
-  counts: Record<Show, number>;
+  counts: Counts;
 };
 
 const byLot = (a: Lot, b: Lot) => a.lotNum - b.lotNum || a.lot.localeCompare(b.lot);
@@ -43,11 +47,13 @@ export function applyFilters(all: Lot[], f: Filters, ctx: Ctx): Result {
   const isWatched = (l: Lot) => !!ctx.watch[lotKey(ctx.auctionId, l.lot)];
   const isHidden = (l: Lot) => !!ctx.hidden[lotKey(ctx.auctionId, l.lot)];
 
-  const counts = { all: 0, watched: 0, hidden: 0 };
+  const isNew = (l: Lot) => !!ctx.isNew?.has(l.lot);
+  const counts = { all: 0, watched: 0, hidden: 0, new: 0 };
   for (const l of all) {
     if (isHidden(l)) counts.hidden++;
     else counts.all++;
     if (isWatched(l)) counts.watched++;
+    if (isNew(l) && !isHidden(l)) counts.new++;
   }
 
   const empty = isEmptyQuery(query);
@@ -58,6 +64,7 @@ export function applyFilters(all: Lot[], f: Filters, ctx: Ctx): Result {
         (!f.photo || !!l.imageId) &&
         (!f.noMin || l.minCents === 0) &&
         (f.donations || !l.donation) &&
+        (!f.newOnly || isNew(l)) &&
         (empty || matchQuery(l, query)),
     )
     .sort(SORTS[f.sort]);
@@ -75,6 +82,7 @@ export function activeChips(f: Filters, defaults: Filters): Chip[] {
   if (f.show === 'hidden') chips.push({ id: 'show', label: 'Hidden', clear: { show: 'all' } });
   if (f.photo) chips.push({ id: 'photo', label: 'Has photo', clear: { photo: false } });
   if (f.noMin) chips.push({ id: 'noMin', label: 'No minimum', clear: { noMin: false } });
+  if (f.newOnly) chips.push({ id: 'newOnly', label: 'New', clear: { newOnly: false } });
   if (f.donations !== defaults.donations)
     chips.push({
       id: 'donations',

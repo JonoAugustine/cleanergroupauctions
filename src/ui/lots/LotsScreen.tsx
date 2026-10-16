@@ -4,6 +4,10 @@ import { lotsCsv, watchlistText } from '@/lib/exporters';
 import { activeChips, applyFilters, defaultFilters, type Filters } from '@/lib/filters';
 import { plural } from '@/lib/format';
 import { getHome } from '@/lib/home-cache';
+import { rememberLots } from '@/lib/lots-source';
+import { newLots } from '@/lib/new-lots';
+import { isSaved, loadSearches, saveSearch } from '@/lib/searches';
+import { seenItem } from '@/lib/stores';
 import { highlightTerms } from '@/lib/search';
 import { updateSettings, type Settings } from '@/lib/settings';
 import { hidden, loadUserData, lotKey, toggleHidden, toggleWatch, watch } from '@/lib/userdata';
@@ -22,7 +26,10 @@ type Props = { auctionId: string; settings: Settings };
 export function LotsScreen({ auctionId, settings }: Props) {
   const { state, refresh } = useLots();
   const defaults = useMemo(() => defaultFilters(settings.donations), [settings.donations]);
-  const [filters, setFilters] = useState<Filters>(defaults);
+  // Home links here with #q=… or #lot=… (SPEC.md §4.2).
+  const hash = useMemo(() => new URLSearchParams(location.hash.slice(1)), []);
+  const [filters, setFilters] = useState<Filters>(() => ({ ...defaults, q: hash.get('q') ?? '' }));
+  const [isNew, setIsNew] = useState<Set<string>>(new Set());
   const [view, setView] = useState(settings.view);
   const [current, setCurrent] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -34,7 +41,25 @@ export function LotsScreen({ auctionId, settings }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
 
-  useEffect(() => void loadUserData(), []);
+  useEffect(() => void (loadUserData(), loadSearches()), []);
+
+  // New since last visit: compare with the lots seen last time, then remember this visit's lots.
+  const firstLoad = useRef(true);
+  useEffect(() => {
+    if (state.status !== 'ready') return;
+    const lots = state.preview.lots;
+    void rememberLots(auctionId, lots);
+    void (async () => {
+      const seen = await seenItem.getValue();
+      if (firstLoad.current) {
+        firstLoad.current = false;
+        if (settings.newBadge) setIsNew(newLots(lots, seen[auctionId]));
+        const fromHash = hash.get('lot');
+        if (fromHash && lots.some((l) => l.lot === fromHash)) open(fromHash);
+      }
+      await seenItem.setValue({ ...(await seenItem.getValue()), [auctionId]: lots.map((l) => l.lot) });
+    })();
+  }, [state.status === 'ready' && state.preview]);
   useEffect(() => {
     getHome()
       .then((h) => setAuctions(h.auctions))
@@ -48,8 +73,8 @@ export function LotsScreen({ auctionId, settings }: Props) {
 
   const all = state.status === 'ready' ? state.preview.lots : [];
   const result = useMemo(
-    () => applyFilters(all, filters, { auctionId, watch: watch.value, hidden: hidden.value }),
-    [all, filters, auctionId, watch.value, hidden.value],
+    () => applyFilters(all, filters, { auctionId, watch: watch.value, hidden: hidden.value, isNew }),
+    [all, filters, auctionId, watch.value, hidden.value, isNew],
   );
   const terms = useMemo(() => highlightTerms(result.query), [result.query]);
   const chips = activeChips(filters, defaults);
@@ -207,6 +232,7 @@ export function LotsScreen({ auctionId, settings }: Props) {
             filters={filters}
             set={set}
             counts={result.counts}
+            flagNew={settings.newBadge}
             resultCount={result.lots.length}
             labels={labels}
             onClose={filtersOpen ? () => setFiltersOpen(false) : undefined}
@@ -250,6 +276,17 @@ export function LotsScreen({ auctionId, settings }: Props) {
                   Clear all
                 </button>
               </li>
+              {filters.q.trim() && (
+                <li>
+                  {isSaved(filters.q) ? (
+                    <span class="small muted">Search saved</span>
+                  ) : (
+                    <button type="button" class="link-btn small" onClick={() => saveSearch(filters.q)}>
+                      Save this search
+                    </button>
+                  )}
+                </li>
+              )}
             </ul>
           )}
 
@@ -282,7 +319,7 @@ export function LotsScreen({ auctionId, settings }: Props) {
               )}
             </div>
           ) : view === 'grid' ? (
-            <LotGrid lots={result.lots} auctionId={auctionId} terms={terms} current={current} open={open} />
+            <LotGrid lots={result.lots} auctionId={auctionId} terms={terms} current={current} open={open} isNew={isNew} />
           ) : (
             <LotList
               lots={result.lots}
@@ -292,6 +329,7 @@ export function LotsScreen({ auctionId, settings }: Props) {
               open={open}
               selected={selected}
               toggleSelected={toggleSelected}
+              isNew={isNew}
             />
           )}
         </main>
@@ -307,6 +345,7 @@ export function LotsScreen({ auctionId, settings }: Props) {
             close={close}
             enlarge={() => setEnlarged(true)}
             noteFocus={noteFocus}
+            isNew={isNew.has(lot.lot)}
           />
         )}
         {overlayOpen && <div class="scrim" onClick={() => (filtersOpen ? setFiltersOpen(false) : close())} />}

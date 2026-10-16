@@ -19,9 +19,10 @@ type Props = {
   enlarge: () => void;
   /** bumps when N is pressed, to focus the note */
   noteFocus: number;
+  isNew: boolean;
 };
 
-export function LotDrawer({ lot, auctionId, terms, position, total, step, close, enlarge, noteFocus }: Props) {
+export function LotDrawer({ lot, auctionId, terms, position, total, step, close, enlarge, noteFocus, isNew }: Props) {
   const key = lotKey(auctionId, lot.lot);
   const w = watch.value[key];
   const isHidden = !!hidden.value[key];
@@ -59,6 +60,7 @@ export function LotDrawer({ lot, auctionId, terms, position, total, step, close,
         <p class="eyebrow">
           Lot {lot.lot} · Min {formatMin(lot.minCents)}
           {lot.donation && <span class="badge-info">Donation</span>}
+          {isNew && <span class="new-badge inline">New</span>}
         </p>
         <h2 id="cga-drawer-title" class="drawer-title" tabIndex={-1} ref={heading}>
           <Title text={lot.title} terms={terms} />

@@ -1,6 +1,6 @@
 /* Lots screen and shared shell. Breakpoints follow SPEC.md §4.5: phone < 600, tablet 600 to 1023, desktop ≥ 1024. */
 
-.header .search {
+.search {
   flex: 1 1 240px;
   display: flex;
   align-items: center;
@@ -13,11 +13,11 @@
   color: var(--fg-muted);
 }
 
-.header .search:focus-within {
+.search:focus-within {
   border-color: var(--accent-text);
 }
 
-.header .search input {
+.search input {
   flex: 1;
   min-width: 0;
   height: 42px;
@@ -404,6 +404,12 @@ mark {
 
 .list-row .c-lot {
   font-weight: 600;
+}
+
+.list-row .c-lot .new-badge {
+  display: block;
+  width: fit-content;
+  margin: 2px 0 0;
 }
 
 .list-row .c-img img,
@@ -839,4 +845,23 @@ div.drawer-img {
   .skeleton .card {
     animation: none;
   }
+}
+
+.new-badge {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.new-badge.inline {
+  position: static;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
 }

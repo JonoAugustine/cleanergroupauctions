@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { Route } from '@/lib/routes';
-import { rememberHome } from '@/lib/home-cache';
 import { LoggedOutError } from '@/mga/client';
-import { parseHome, parseSelling } from '@/mga/parse';
+import { parseSelling } from '@/mga/parse';
 
 type State = { status: 'loading' } | { status: 'ok'; lines: string[] } | { status: 'error'; message: string; loginUrl?: string };
 
@@ -41,16 +40,6 @@ export function DataCheck({ route }: { route: Route }) {
 const dollars = (c: number) => (c ? `$${(c / 100).toFixed(2)}` : '-');
 
 async function read(route: Route): Promise<string[]> {
-  if (route.kind === 'home') {
-    const h = parseHome(document);
-    void rememberHome(h);
-    const up = h.auctions.filter((a) => a.upcoming);
-    return [
-      `${h.groups.length} clubs: ${h.groups.map((g) => `${g.shortName} (${g.role})`).join(', ')}`,
-      `${h.auctions.length} auctions, ${up.length} upcoming`,
-      ...up.map((a) => `Upcoming: ${a.name}, ${a.date} ${a.time}, min sale ${dollars(a.minSaleCents)}`),
-    ];
-  }
   if (route.kind === 'selling') {
     const s = parseSelling(document);
     return [

@@ -30,7 +30,7 @@ describe('theme', () => {
 describe('backup', () => {
   const watch = { '951:100': { at: 5, note: 'yes', max: '30' } };
   it('round trips', () => {
-    const b = makeBackup(DEFAULT_SETTINGS, watch, { '951:101': true });
+    const b = makeBackup(DEFAULT_SETTINGS, watch, { '951:101': true }, [{ id: 'a', q: 'pleco', createdAt: 1 }]);
     expect(parseBackup(JSON.stringify(b))).toEqual(b);
   });
   it('rejects other files', () => {
@@ -66,7 +66,7 @@ describe('sync items', () => {
   const items = toSyncItems(watch, hidden, { ...DEFAULT_SETTINGS, classic: true, sync: true });
 
   it('splits data by auction and leaves per browser settings out', () => {
-    expect(Object.keys(items).sort()).toEqual(['h:951', 'settings', 'w:951', 'w:963']);
+    expect(Object.keys(items).sort()).toEqual(['h:951', 'searches', 'settings', 'w:951', 'w:963']);
     expect(items['w:951']).toEqual({ '100': { at: 1 }, '101': { at: 2, note: 'x' } });
     expect(items.settings).not.toHaveProperty('classic');
     expect(items.settings).not.toHaveProperty('sync');
