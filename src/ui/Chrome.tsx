@@ -9,7 +9,9 @@ export const openSettings = () => browser.runtime.sendMessage({ type: 'cga:open-
 export function Footer() {
   return (
     <footer class="footer">
-      <span>{CREDIT}</span>
+      <span>
+        {CREDIT} · v{browser.runtime.getManifest().version}
+      </span>
       <span class="spacer" />
       <button type="button" class="btn" onClick={openSettings}>
         Settings
