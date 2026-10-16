@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+h1 {
+  font: 400 40px/1.1 var(--font-display);
+  margin: 0 0 24px;
+}
+
+h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.row input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+
+.row small {
+  display: block;
+  color: var(--fg-muted);
+}

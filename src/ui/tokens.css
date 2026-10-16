@@ -1,0 +1,77 @@
+/* Default palette (SPEC.md §5). Milestone 4 overrides the starred roles from Settings.
+   Mixes use oklab: white has no hue, so oklch mixes drift toward purple. */
+:host,
+:root {
+  --bg: #141914; /* * */
+  --accent: #4e9a5b; /* * */
+  --watch: #e9b949; /* * */
+  --surface: color-mix(in oklab, var(--bg) 88%, white);
+  --surface-2: color-mix(in oklab, var(--bg) 80%, white);
+  --border: color-mix(in oklab, var(--bg) 72%, white);
+  --border-strong: color-mix(in oklab, var(--bg) 45%, white);
+  --fg: oklch(0.94 0.006 120);
+  --fg-muted: oklch(0.72 0.01 140);
+  --fg-subtle: oklch(0.665 0.01 140);
+  --accent-fg: #fff;
+  --accent-text: color-mix(in oklab, var(--accent) 80%, white);
+  --accent-soft: color-mix(in oklab, var(--accent) 22%, var(--bg));
+  --accent-soft-fg: color-mix(in oklab, var(--accent) 70%, white);
+  --danger: oklch(0.68 0.19 18);
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --font-ui: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, serif;
+}
+
+/* WXT puts all: initial on the shadow host, so base text styles go on our own root element. */
+.cga-root,
+body {
+  color-scheme: dark;
+  color: var(--fg);
+  background: var(--bg);
+  font: 14px/1.5 var(--font-ui);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--accent-text);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
