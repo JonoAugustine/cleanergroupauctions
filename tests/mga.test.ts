@@ -121,6 +121,10 @@ describe('parseSelling', () => {
     expect(s.items.filter((i) => i.imageIds.length)).toHaveLength(10);
   });
 
+  it('handles an auction with nothing listed yet', () => {
+    expect(parseSelling(fixture('selling-empty'))).toEqual({ auctionId: '951', canAdd: true, items: [] });
+  });
+
   it('sees the add link, which MGA shows even on this past auction', () => {
     expect(s.canAdd).toBe(true);
   });

@@ -18,6 +18,11 @@ let imageId = 900000;
 
 html = html
   .replace(/<!--\s*saved from url=[^>]*-->\s*/gi, '')
+  // Pages saved while CGA (or another extension) was running carry their injected markup.
+  .replace(/<cga-app[^>]*>[\s\S]*?<\/cga-app>/gi, '')
+  .replace(/\s(?:class="cga-takeover"|data-darkreader-[a-z-]+="[^"]*")/gi, '')
+  .replace(/<meta name="darkreader"[^>]*>/gi, '')
+  .replace(/\s*--darkreader-[\w-]+:\s*var\([^)]*\);?/g, '')
   .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
   .replace(/<link\b[^>]*>/gi, '')
   .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
