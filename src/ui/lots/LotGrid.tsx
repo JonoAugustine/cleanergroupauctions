@@ -2,6 +2,7 @@ import { formatMax, formatMin } from '@/lib/format';
 import { lotKey, toggleWatch, watch } from '@/lib/userdata';
 import type { Lot } from '@/mga/types';
 import { Icon } from '../Icon';
+import { Photo } from './Photo';
 import { Title } from './Title';
 
 type Props = { lots: Lot[]; auctionId: string; terms: string[]; current: string | null; open: (lot: string) => void };
@@ -15,7 +16,7 @@ export function LotGrid({ lots, auctionId, terms, current, open }: Props) {
           <li class="card" data-watched={w ? '' : undefined} data-current={current === l.lot ? '' : undefined} key={l.lot}>
             <button type="button" class="card-open" data-open-lot={l.lot} onClick={() => open(l.lot)}>
               <span class="card-img">
-                {l.imageSrc ? <img src={l.imageSrc} alt="" loading="lazy" width={600} height={600} /> : <span class="no-photo">No photo</span>}
+                <Photo src={l.imageSrc} size={600} />
                 <span class="lot-badge">{l.lot}</span>
               </span>
               <span class="card-body">

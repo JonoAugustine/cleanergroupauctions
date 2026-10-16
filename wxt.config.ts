@@ -10,6 +10,10 @@ export default defineConfig({
     short_name: 'CGA',
     description: 'A cleaner, faster interface for MyGroupAuctions.com. Not affiliated with MyGroupAuctions.',
     permissions: ['storage'],
+    // Fonts are declared on the MGA page (shadow roots cannot hold @font-face everywhere).
+    web_accessible_resources: [
+      { resources: ['fonts/*.woff2'], matches: ['https://mygroupauctions.com/*', 'https://www.mygroupauctions.com/*'] },
+    ],
     ...(browser === 'firefox' && {
       browser_specific_settings: {
         gecko: {

@@ -3,14 +3,15 @@ import { storage } from 'wxt/utils/storage';
 
 /** `${auctionId}:${lotNumber}`. Lot numbers are stable within an auction once assigned. */
 export type LotKey = string;
+/** `at` is when the entry last changed, so sync and import can keep the newest copy. */
 export type WatchEntry = { note?: string; max?: string; at: number };
 export type Watch = Record<LotKey, WatchEntry>;
 export type Hidden = Record<LotKey, true>;
 
 export const lotKey = (auctionId: string, lot: string): LotKey => `${auctionId}:${lot}`;
 
-const watchItem = storage.defineItem<Watch>('local:watch', { fallback: {} });
-const hiddenItem = storage.defineItem<Hidden>('local:hidden', { fallback: {} });
+export const watchItem = storage.defineItem<Watch>('local:watch', { fallback: {} });
+export const hiddenItem = storage.defineItem<Hidden>('local:hidden', { fallback: {} });
 
 export const watch = signal<Watch>({});
 export const hidden = signal<Hidden>({});
@@ -41,7 +42,7 @@ export function toggleWatch(key: LotKey) {
 
 /** Adding a note or max bid watches the lot. Empty values are dropped. */
 export function updateWatch(key: LotKey, patch: { note?: string; max?: string }) {
-  const entry: WatchEntry = { ...(watch.value[key] ?? { at: Date.now() }), ...patch };
+  const entry: WatchEntry = { ...watch.value[key], ...patch, at: Date.now() };
   if (!entry.note) delete entry.note;
   if (!entry.max) delete entry.max;
   saveWatch({ ...watch.value, [key]: entry });

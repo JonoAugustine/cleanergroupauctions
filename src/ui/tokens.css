@@ -19,8 +19,8 @@
   --danger: oklch(0.68 0.19 18);
   --radius-control: 8px;
   --radius-card: 12px;
-  --font-ui: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-ui: 'CGA Open Sans', 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'CGA Instrument Serif', 'Instrument Serif', Georgia, serif;
 }
 
 /* WXT puts all: initial on the shadow host, so base text styles go on our own root element. */

@@ -4,6 +4,7 @@ import { cleanMax, formatMin } from '@/lib/format';
 import { hidden, lotKey, toggleHidden, toggleWatch, updateWatch, watch } from '@/lib/userdata';
 import type { Lot } from '@/mga/types';
 import { Icon } from '../Icon';
+import { Photo } from './Photo';
 import { Title } from './Title';
 
 type Props = {
@@ -48,8 +49,8 @@ export function LotDrawer({ lot, auctionId, terms, position, total, step, close,
 
       <div class="drawer-body">
         {lot.imageSrc ? (
-          <button type="button" class="drawer-img" onClick={enlarge} aria-label="Enlarge photo">
-            <img src={lot.imageSrc} alt="" width={600} height={600} />
+          <button type="button" class="drawer-img" onClick={enlarge} aria-label="Enlarge photo" key={lot.lot}>
+            <Photo src={lot.imageSrc} size={600} />
           </button>
         ) : (
           <div class="drawer-img no-photo">No photo</div>

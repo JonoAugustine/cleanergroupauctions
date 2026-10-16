@@ -22,20 +22,20 @@ export const DEFAULT_SETTINGS: Settings = {
   view: 'grid',
 };
 
-const item = storage.defineItem<Settings>('local:settings', { fallback: DEFAULT_SETTINGS });
+export const settingsItem = storage.defineItem<Settings>('local:settings', { fallback: DEFAULT_SETTINGS });
 
 export async function getSettings(): Promise<Settings> {
-  return { ...DEFAULT_SETTINGS, ...(await item.getValue()) };
+  return { ...DEFAULT_SETTINGS, ...(await settingsItem.getValue()) };
 }
 
 export async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const next = { ...(await getSettings()), ...patch };
-  await item.setValue(next);
+  await settingsItem.setValue(next);
   return next;
 }
 
 export function watchSettings(cb: (s: Settings) => void) {
-  return item.watch((s) => cb({ ...DEFAULT_SETTINGS, ...s }));
+  return settingsItem.watch((s) => cb({ ...DEFAULT_SETTINGS, ...s }));
 }
 
 export const setClassic = (classic: boolean) => updateSettings({ classic });

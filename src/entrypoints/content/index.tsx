@@ -4,7 +4,9 @@ import { createShadowRootUi } from 'wxt/utils/content-script-ui/shadow-root';
 import type { ContentScriptContext } from 'wxt/utils/content-script-context';
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { isTakeover, routeFor } from '@/lib/routes';
-import { getSettings, watchSettings } from '@/lib/settings';
+import { injectFonts } from '@/lib/fonts';
+import { getSettings, watchSettings, type Settings } from '@/lib/settings';
+import { applyTheme } from '@/lib/theme';
 import { App } from '@/ui/App';
 import { CgaBar, UseCgaPill } from '@/ui/Chrome';
 import './lots.css';
@@ -33,30 +35,41 @@ export default defineContentScript({
     const hideStyle = takeover ? hideOriginalPage() : null;
 
     const settings = await getSettings();
-    // Any Classic view change, from the footer, the pill or Settings, reloads into the right mode.
-    watchSettings((s) => s.classic !== settings.classic && location.reload());
+    if (hideStyle) hideStyle.textContent = hideCss(settings.bg);
 
     await bodyReady();
+    injectFonts(document);
+    const host = settings.classic
+      ? await mount(ctx, <UseCgaPill />, 'last')
+      : await mount(ctx, takeover ? <App route={route} settings={settings} /> : <CgaBar />, takeover ? 'last' : 'first');
     if (settings.classic) {
       hideStyle?.remove();
       document.documentElement.classList.remove(TAKEOVER_CLASS);
-      return mount(ctx, <UseCgaPill />, 'last');
     }
-    if (takeover) return mount(ctx, <App route={route} settings={settings} />, 'last');
-    return mount(ctx, <CgaBar />, 'first');
+    applyTheme(host, settings);
+
+    watchSettings((s) => {
+      // Any Classic view change, from the footer, the pill or Settings, reloads into the right mode.
+      if (s.classic !== settings.classic) return location.reload();
+      // Colors preview live while Settings is open in another tab.
+      applyTheme(host, s);
+      if (hideStyle?.isConnected) hideStyle.textContent = hideCss(s.bg);
+    });
   },
 });
 
 function hideOriginalPage() {
   document.documentElement.classList.add(TAKEOVER_CLASS);
   const style = document.createElement('style');
-  style.textContent = `
-    html.${TAKEOVER_CLASS} body > :not(${HOST}) { display: none !important; }
-    html.${TAKEOVER_CLASS}, html.${TAKEOVER_CLASS} body { background: #141914 !important; margin: 0 !important; }
-  `;
+  style.textContent = hideCss('#141914');
   document.documentElement.append(style);
   return style;
 }
+
+const hideCss = (bg: Settings['bg']) => `
+  html.${TAKEOVER_CLASS} body > :not(${HOST}) { display: none !important; }
+  html.${TAKEOVER_CLASS}, html.${TAKEOVER_CLASS} body { background: ${bg} !important; margin: 0 !important; }
+`;
 
 function bodyReady() {
   if (document.body) return Promise.resolve();
@@ -80,4 +93,5 @@ async function mount(ctx: ContentScriptContext, node: VNode, append: 'first' | '
     },
   });
   ui.mount();
+  return ui.shadowHost;
 }

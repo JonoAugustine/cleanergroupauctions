@@ -2,6 +2,7 @@ import { formatMax, formatMin } from '@/lib/format';
 import { lotKey, watch } from '@/lib/userdata';
 import type { Lot } from '@/mga/types';
 import { StarButton } from './LotGrid';
+import { Photo } from './Photo';
 import { Title } from './Title';
 
 type Props = {
@@ -58,7 +59,7 @@ export function LotList({ lots, auctionId, terms, current, open, selected, toggl
               {l.lot}
             </span>
             <span role="cell" class="c-img">
-              {l.imageSrc ? <img src={l.imageSrc} alt="" loading="lazy" width={48} height={48} /> : <span class="no-photo" />}
+              <Photo src={l.imageSrc} size={48} label="" />
             </span>
             <span role="cell" class="c-title">
               <button type="button" class="link-btn" data-open-lot={l.lot} onClick={() => open(l.lot)}>
