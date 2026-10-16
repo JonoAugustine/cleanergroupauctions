@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { Route } from '@/lib/routes';
-import { loadAllLots, LoggedOutError } from '@/mga/client';
-import { parseHome, parsePreview, parseSelling } from '@/mga/parse';
+import { rememberHome } from '@/lib/home-cache';
+import { LoggedOutError } from '@/mga/client';
+import { parseHome, parseSelling } from '@/mga/parse';
 
 type State = { status: 'loading' } | { status: 'ok'; lines: string[] } | { status: 'error'; message: string; loginUrl?: string };
 
@@ -42,26 +43,12 @@ const dollars = (c: number) => (c ? `$${(c / 100).toFixed(2)}` : '-');
 async function read(route: Route): Promise<string[]> {
   if (route.kind === 'home') {
     const h = parseHome(document);
+    void rememberHome(h);
     const up = h.auctions.filter((a) => a.upcoming);
     return [
       `${h.groups.length} clubs: ${h.groups.map((g) => `${g.shortName} (${g.role})`).join(', ')}`,
       `${h.auctions.length} auctions, ${up.length} upcoming`,
       ...up.map((a) => `Upcoming: ${a.name}, ${a.date} ${a.time}, min sale ${dollars(a.minSaleCents)}`),
-    ];
-  }
-  if (route.kind === 'lots') {
-    let p = parsePreview(document);
-    const firstPage = p.lots.length;
-    const form = document.querySelector<HTMLFormElement>('form#aspnetForm');
-    const started = performance.now();
-    if (!p.complete && form) p = parsePreview(await loadAllLots(form));
-    const ms = Math.round(performance.now() - started);
-    const lots = p.lots;
-    return [
-      `${lots.length} lots loaded (page showed ${firstPage}, pager said ${p.total ?? 'nothing'}) in ${ms} ms`,
-      `${lots.filter((l) => l.imageId).length} with photos, ${lots.filter((l) => l.minCents).length} with a minimum, ${lots.filter((l) => l.donation).length} donations`,
-      `Lots ${Math.min(...lots.map((l) => l.lotNum))} to ${Math.max(...lots.map((l) => l.lotNum))}`,
-      ...lots.slice(0, 3).map((l) => `#${l.lot} ${l.title.split('\n')[0]} · min ${dollars(l.minCents)} · photo ${l.imageId ?? 'none'}`),
     ];
   }
   if (route.kind === 'selling') {

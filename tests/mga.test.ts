@@ -173,3 +173,19 @@ describe('postbacks', () => {
     expect(hiddenInputs(live).__NOT_IN_FORM).toBeUndefined();
   });
 });
+
+describe('load all and print', () => {
+  it('ticks only the chosen lots and posts Print Selected', async () => {
+    const { printSelected } = await import('@/mga/client');
+    const doc = fixture('preview');
+    const form = doc.querySelector<HTMLFormElement>('form#aspnetForm')!;
+    const boxes = [...form.querySelectorAll<HTMLInputElement>('input[name$="SelectedCB"]')];
+    boxes[0]!.checked = true;
+    let submitted = false;
+    form.submit = () => void (submitted = true);
+    printSelected(form, new Set([boxes[2]!.name, boxes[3]!.name]));
+    expect(boxes.filter((b) => b.checked).map((b) => b.name)).toEqual([boxes[2]!.name, boxes[3]!.name]);
+    expect(form.querySelector<HTMLInputElement>('input[name="__EVENTTARGET"]')!.value).toBe('ctl00$Content$PrintSelectedLB');
+    expect(submitted).toBe(true);
+  });
+});

@@ -2,7 +2,7 @@
   "name": "cleanergroupauctions",
   "description": "A cleaner, faster interface for MyGroupAuctions.com. Not affiliated with MyGroupAuctions.",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "author": "@JonoAugustine",
   "scripts": {
@@ -16,6 +16,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@preact/signals": "^2.11.3",
     "preact": "^10.29.8"
   },
   "devDependencies": {

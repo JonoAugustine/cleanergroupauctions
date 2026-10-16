@@ -48,12 +48,28 @@ export const PREVIEW_GRID = 'ctl00$Content$dgItems';
 
 /**
  * One request that returns every lot: RadGrid's PageSize command set to 5000.
- * Afterwards the live form's hidden fields are updated so later postbacks (Print Selected) validate.
+ * The response's grid replaces the live one and its hidden fields are copied into the live form, so
+ * MGA's own postbacks (Print Selected) see every lot's checkbox and validate.
  */
 export async function loadAllLots(form: HTMLFormElement) {
   const doc = await postBack(form, PREVIEW_GRID, `FireCommand:${PREVIEW_GRID}$ctl00;PageSize;5000`);
+  const fresh = doc.getElementById('ctl00_Content_dgItems');
+  const live = form.ownerDocument.getElementById('ctl00_Content_dgItems');
+  if (fresh && live) live.replaceWith(form.ownerDocument.importNode(fresh, true));
   syncHiddenInputs(doc, form);
   return doc;
+}
+
+/**
+ * MGA's Print Selected: ticks exactly these checkboxes in the live form and submits it, which is what
+ * __doPostBack does. The tab then goes to MGA's label page. Read only; it changes nothing on MGA.
+ */
+export function printSelected(form: HTMLFormElement, selectNames: Set<string>) {
+  for (const cb of form.querySelectorAll<HTMLInputElement>('input[type=checkbox][name$="SelectedCB"]'))
+    cb.checked = selectNames.has(cb.name);
+  form.querySelector<HTMLInputElement>('input[name="__EVENTTARGET"]')!.value = 'ctl00$Content$PrintSelectedLB';
+  form.querySelector<HTMLInputElement>('input[name="__EVENTARGUMENT"]')!.value = '';
+  form.submit();
 }
 
 /** Copies hidden inputs from a postback response into MGA's live form. Only fields the form already has. */

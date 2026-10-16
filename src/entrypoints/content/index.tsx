@@ -7,6 +7,7 @@ import { isTakeover, routeFor } from '@/lib/routes';
 import { getSettings, watchSettings } from '@/lib/settings';
 import { App } from '@/ui/App';
 import { CgaBar, UseCgaPill } from '@/ui/Chrome';
+import './lots.css';
 
 const HOST = 'cga-app';
 const TAKEOVER_CLASS = 'cga-takeover';
@@ -41,7 +42,7 @@ export default defineContentScript({
       document.documentElement.classList.remove(TAKEOVER_CLASS);
       return mount(ctx, <UseCgaPill />, 'last');
     }
-    if (takeover) return mount(ctx, <App route={route} />, 'last');
+    if (takeover) return mount(ctx, <App route={route} settings={settings} />, 'last');
     return mount(ctx, <CgaBar />, 'first');
   },
 });
