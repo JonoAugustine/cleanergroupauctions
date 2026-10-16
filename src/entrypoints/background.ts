@@ -4,7 +4,7 @@ import { mergeHidden, mergeWatch } from '@/lib/backup';
 import { getSettings, updateSettings } from '@/lib/settings';
 import { fromSyncItems, SYNCED_SETTINGS, syncDiff, toSyncItems } from '@/lib/sync-items';
 import { syncStatus } from '@/lib/sync-status';
-import { hiddenItem, watchItem } from '@/lib/userdata';
+import { hiddenItem, watchItem } from '@/lib/stores';
 
 export default defineBackground(() => {
   // Content scripts cannot open the options page themselves.
