@@ -1,7 +1,7 @@
 import { storage } from 'wxt/utils/storage';
 import { loadAllLots, mgaRequest } from '@/mga/client';
 import { parsePreview, parseSelling } from '@/mga/parse';
-import type { Lot } from '@/mga/types';
+import type { Lot, Selling } from '@/mga/types';
 
 type Cached = { at: number; lots: Lot[] };
 const MAX_AGE = 10 * 60 * 1000;
@@ -35,7 +35,11 @@ const sellingItem = (auctionId: string) => storage.defineItem<{ at: number; coun
 export async function getSellingSummary(auctionId: string) {
   const cached = await sellingItem(auctionId).getValue();
   if (cached && Date.now() - cached.at < MAX_AGE) return cached;
-  const s = parseSelling(await mgaRequest(`/auction-items.aspx?id=${auctionId}`));
+  return rememberSelling(auctionId, parseSelling(await mgaRequest(`/auction-items.aspx?id=${auctionId}`)));
+}
+
+/** The Selling screen keeps Home's count current after every change. */
+export async function rememberSelling(auctionId: string, s: Selling) {
   const summary = { at: Date.now(), count: s.items.length, canAdd: s.canAdd };
   await sellingItem(auctionId).setValue(summary);
   return summary;

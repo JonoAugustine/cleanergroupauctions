@@ -7,6 +7,9 @@ export function cleanMax(input: string) {
   return /^\d+(\.\d{1,2})?$/.test(s) ? s : '';
 }
 
+/** Minimum bid in a sentence: "No minimum" or "Min $10.00". */
+export const minLabel = (cents: number) => (cents ? `Min ${formatMin(cents)}` : 'No minimum');
+
 export const formatMax = (max: string | undefined) => (max ? `$${max}` : '');
 
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;

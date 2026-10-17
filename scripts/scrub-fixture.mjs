@@ -34,7 +34,7 @@ html = html
   .replace(/(href|action)="https?:\/\/(?:www\.)?mygroupauctions\.com\/([^"]*)"/gi, '$1="$2"')
   .replace(/[ \t]+$/gm, '');
 
-const leaks = [/Augustine/i, /\bJonathan\b/i, /_files\//];
+const leaks = [/Augustine/i, /\bJonathan\b/i, /Capital Exotic/i, /_files\//];
 for (const re of leaks) if (re.test(html)) throw new Error(`${src}: still contains ${re}`);
 
 writeFileSync(dest, html);

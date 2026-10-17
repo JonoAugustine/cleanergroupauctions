@@ -115,7 +115,7 @@ export function parseSelling(doc: Document): Selling {
   };
 }
 
-/** dialogs/AuctionItem.aspx?auctionItemId=N&auctionId=N&mode=user. Read only. */
+/** dialogs/AuctionItem.aspx?auctionItemId=N&auctionId=N&mode=user, and every postback response from it. */
 export function parseItemDialog(doc: Document): ItemDialog {
   const desc = doc.querySelector<HTMLTextAreaElement>('textarea[name="ctl00$Content$DescriptionTB"]');
   const min = doc.querySelector<HTMLInputElement>('input[name="ctl00$Content$MinBidTB"]');
@@ -139,6 +139,8 @@ export function parseItemDialog(doc: Document): ItemDialog {
     isDonation: !!doc.querySelector<HTMLInputElement>('input[name="ctl00$Content$IsDonationCB"]')?.hasAttribute('checked'),
     canUpload: !!doc.querySelector('input[type=file][name="ctl00$Content$FileUpload1"]'),
     images,
+    message: clean(doc.getElementById('ctl00_Content_MessageLbl')?.textContent),
+    errors: [...doc.querySelectorAll('#ctl00_Content_ValidationSummary1 li')].map((li) => clean(li.textContent)).filter(Boolean),
   };
 }
 

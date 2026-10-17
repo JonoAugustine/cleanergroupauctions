@@ -110,7 +110,22 @@ Item dialog fields (names are prefixed `ctl00$Content$`):
 
 - **New item** (id 0): form is urlencoded and shows "You can add images after saving the item."
 - **Existing item**: form becomes `multipart/form-data` and adds `FileUpload1` (file), `IsPrimaryCB`, `UploadImageBtn` (submit), and an image list where each row has `DeleteIB` and `EditButton`. One file per upload.
-- **UNVERIFIED**: what Save returns (redirect, script that closes the RadWindow, or the same page with the new id), how errors render, whether upload accepts any image type or size, what Copy creates (same auction duplicate), and whether lot numbers are assigned on save. **Capture these only on a throwaway item and only after the user explicitly approves each write**, because every write lands in a real club auction.
+
+Verified on Oct 16, 2026 (Firefox HAR, auction 951, the user's own real items; scrubbed responses in `tests/fixtures/item-saved.html`, `item-photos.html`, `selling-upcoming.html`):
+- **Blank description**: blocked client side by the ASP.NET validators; no request is sent. Server side errors were not seen.
+- **Save** (`__EVENTTARGET=ctl00$Content$SaveLB`, fields `AuctionItemIDHF`, `DescriptionTB`, `MinBidTB`, `IsDonationCB=on` only when ticked): returns the **same dialog page**, HTTP 200, no redirect and no closing script. `AuctionItemIDHF` now holds the new id (e.g. 147818), `MessageLbl` reads "Item successfully saved.", and the form is now the multipart one with the upload field. The dialog URL keeps `auctionItemId=0`; the id lives in `AuctionItemIDHF`.
+- **Lot numbers are assigned on save**: the new item showed as lot 628 on the list straight away.
+- `MinBidTB` accepts `6` and `12`; MGA echoes it back as `$6.00`.
+- **Save with a file chosen does not upload it.** Only `UploadImageBtn` uploads (empty `__EVENTTARGET`, the submit button's own name and value). The response is the same dialog with the image grid.
+- **Uploads are slow** (about 2 s for a 1 MB JPEG) and **requests the browser abandoned still landed**: three clicks on Upload stored three copies (ids 71724, 71725, 71726). CGA must disable Upload while one is in flight and never retry on its own.
+- **Primary**: the newest upload with `IsPrimaryCB` ticked becomes the only primary; earlier ones show "No". The checkbox renders unticked once an item has a primary. `EditButton` (change primary of an existing photo) is **UNVERIFIED**.
+- **Delete photo**: native submit of the row's image input, i.e. `…$RadGrid$ctl00$ctlNN$DeleteIB.x` and `.y`, empty `__EVENTTARGET`, after a browser `confirm()`. Response is the dialog without that image.
+- `imagehandler.ashx` serves photos with `Content-Type: text/html`; sniff the bytes when reading one back.
+- **Copy** (list page, `…$dgItems$ctl00$ctlNN$CopyIB.x/.y`): returns the list page with a new item in the same auction (new auctionItemId and the next lot number, here 629) with the same description and minimum. Whether photos are copied is **UNVERIFIED** (the copied item had none).
+- **Delete item** (list page, `…$DeleteIB.x/.y`): returns the list page without it.
+- After the dialog closes MGA posts `ctl00$Content$RefreshAuctionItemListBtn` to reload the list; a plain GET of the list works as well.
+- Print links on the list page: `PrintAvery8164LB`, `PrintAvery5160LB` (labels for your own items) and `ExportLB`, all `__doPostBack` on the live form.
+- Still **UNVERIFIED**: server side validation errors, upload size and type limits, adding to a past auction.
 
 ### 3.5 Reports (later)
 - `dialogs/ReportsMenu.aspx?AuctionID=N` has radios `rblReport` with values `ctl00$Content$rblReport_SellerDetail` ("Seller Detail Report") and `ctl00$Content$rblReport_Buyers` ("Buyer's Report / Receipt"), an empty `cboBuyers` select, and OK = `__doPostBack('ctl00$Content$btnPrint_Text','')`.
@@ -153,7 +168,7 @@ Reference designs: the Design canvas "CleanerGroupAuctions Mockups" (private to 
 
 ### 4.3 Selling
 - "Your listings" for the selected auction with Edit, Copy (confirm), Delete (confirm, danger style). Empty state copy: "Nothing listed yet. Add an item, or relist something you sold at an earlier auction."
-- **One step item form** (modal on desktop/tablet, full screen on phone): Description (required, same error text as MGA), Minimum bid (`$` prefix; helper "0 means no minimum. This auction's minimum sale price is $X."), Donated to the club, Photos (grid, "Primary" badge, make primary, remove, add multiple). Photos selected before the first save are queued and uploaded right after the save completes, hiding MGA's "save first, then add images" rule.
+- **One step item form** (modal on desktop/tablet, full screen on phone): Description (required, same error text as MGA), Minimum bid (`$` prefix; helper "0 means no minimum. This auction's minimum sale price is $X."), Donated to the club, Photos (grid, "Primary" badge, make primary, remove, add multiple). Photos selected before the first save are queued and uploaded right after the save completes, hiding MGA's "save first, then add images" rule. Until `EditButton` is captured, "make primary" is offered for new photos only (the primary one uploads last, with `IsPrimaryCB`). Photos over 2000 px or 2 MB are scaled to a 2000 px JPEG before upload.
 - **Relist from a past auction**: lists the user's items from earlier auctions (via `auction-items.aspx?id=<past>`), prefills description, minimum and photos (fetch the image from `imagehandler.ashx` and reupload it).
 - Print my labels: hand off to MGA's own flow.
 - Footnote: "MGA assigns lot numbers when an item is saved. Changes save straight to MyGroupAuctions."
@@ -224,7 +239,7 @@ Lot numbers are stable within an auction once assigned. If a lot's title changes
 3. **Lots catalog**: search, filters, grid/list, drawer, keyboard, watch/hide/notes/max, labels via Print Selected, CSV, responsive layouts.
 4. **Settings and theming**: color pickers with derivation and contrast warning, behavior switches, export/import/clear, options page.
 5. **Home**: next auction, saved searches with counts, cross auction search, new since last visit, my clubs.
-6. **Selling**: list, form, photo queue, edit, copy, delete, relist. Requires the UNVERIFIED behaviors in 3.4 to be captured with the author's approval first.
+6. **Selling**: list, form, photo queue, edit, copy, delete, relist. Save, upload, copy and delete were captured on Oct 16 (§3.4).
 7. **Release**: icons, store listings, privacy statement, AMO and Chrome Web Store submissions, Firefox for Android check.
 8. **Later**: history from PDF reports; print friendly watchlist.
 

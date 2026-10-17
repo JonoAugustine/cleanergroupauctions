@@ -7,3 +7,5 @@ The scrub removes scripts, styles, ViewState, the logged in name and emails, and
 - `selling.html`: /auction-items.aspx?id=963 (past auction), 13 of the user's own items
 - `selling-empty.html`: /auction-items.aspx?id=951 with nothing listed (saved while CGA was running)
 - `item.html`: dialogs/AuctionItem.aspx for item 146356 in auction 963, one primary photo
+- `item-new.html`, `item-saved.html`, `item-photos.html`: the item dialog for a new item in auction 951, MGA's reply to Save, and the reply after uploads (3 photos, the last primary). From a HAR the user recorded on Oct 16 while listing real items; real image ids kept.
+- `selling-upcoming.html`: /auction-items.aspx?id=951 after a Copy (7 items, the copy is lot 629)

@@ -77,4 +77,8 @@ export type ItemDialog = {
   /** Existing items get a multipart form with an upload field; new items (id 0) do not. */
   canUpload: boolean;
   images: ItemImage[];
+  /** MGA's status line, e.g. "Item successfully saved." */
+  message: string;
+  /** Server side validation summary, if MGA ever renders one. */
+  errors: string[];
 };

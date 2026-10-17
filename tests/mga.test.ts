@@ -148,6 +148,8 @@ describe('parseItemDialog', () => {
           editName: 'ctl00$Content$RadGrid$ctl00$ctl04$EditButton',
         },
       ],
+      message: '',
+      errors: [],
     });
   });
 });

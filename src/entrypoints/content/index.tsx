@@ -11,6 +11,7 @@ import { App } from '@/ui/App';
 import { CgaBar, UseCgaPill } from '@/ui/Chrome';
 import './lots.css';
 import './home.css';
+import './selling.css';
 
 const HOST = 'cga-app';
 const TAKEOVER_CLASS = 'cga-takeover';

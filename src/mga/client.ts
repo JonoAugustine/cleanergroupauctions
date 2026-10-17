@@ -25,6 +25,14 @@ export async function mgaRequest(url: string, init: RequestInit = {}) {
   return toDoc(await res.text());
 }
 
+/** Same origin GET for a file, e.g. one of the user's own photos for relisting. */
+export async function mgaBlob(url: string) {
+  const res = await pageFetch(new URL(url, location.href).href, { credentials: 'include' });
+  if (LOGIN_RE.test(res.url)) throw new LoggedOutError(res.url);
+  if (!res.ok) throw new Error(`MyGroupAuctions answered ${res.status}`);
+  return res.blob();
+}
+
 /** Body for an ASP.NET postback built from a form's current fields. */
 export function postBackBody(form: HTMLFormElement, target: string, argument = '') {
   const fd = new FormData(form);
@@ -53,11 +61,19 @@ export const PREVIEW_GRID = 'ctl00$Content$dgItems';
  */
 export async function loadAllLots(form: HTMLFormElement) {
   const doc = await postBack(form, PREVIEW_GRID, `FireCommand:${PREVIEW_GRID}$ctl00;PageSize;5000`);
+  adoptGrid(doc, form);
+  return doc;
+}
+
+/**
+ * Makes MGA's live form match a response: swaps in the response's dgItems grid and copies its hidden
+ * fields, so the next postback from the live form passes event validation.
+ */
+export function adoptGrid(doc: Document, form: HTMLFormElement) {
   const fresh = doc.getElementById('ctl00_Content_dgItems');
   const live = form.ownerDocument.getElementById('ctl00_Content_dgItems');
   if (fresh && live) live.replaceWith(form.ownerDocument.importNode(fresh, true));
   syncHiddenInputs(doc, form);
-  return doc;
 }
 
 /**
@@ -67,7 +83,12 @@ export async function loadAllLots(form: HTMLFormElement) {
 export function printSelected(form: HTMLFormElement, selectNames: Set<string>) {
   for (const cb of form.querySelectorAll<HTMLInputElement>('input[type=checkbox][name$="SelectedCB"]'))
     cb.checked = selectNames.has(cb.name);
-  form.querySelector<HTMLInputElement>('input[name="__EVENTTARGET"]')!.value = 'ctl00$Content$PrintSelectedLB';
+  submitPostBack(form, 'ctl00$Content$PrintSelectedLB');
+}
+
+/** What __doPostBack does: the tab navigates to MGA's response. */
+export function submitPostBack(form: HTMLFormElement, target: string) {
+  form.querySelector<HTMLInputElement>('input[name="__EVENTTARGET"]')!.value = target;
   form.querySelector<HTMLInputElement>('input[name="__EVENTARGUMENT"]')!.value = '';
   form.submit();
 }
