@@ -221,7 +221,7 @@ export function LotsScreen({ auctionId, settings }: Props) {
 
   return (
     <Shell screen="lots" auctionId={auctionId} header={header}>
-      <div class={`lots${lot ? ' has-drawer' : ''}`} ref={root}>
+      <div class="lots" ref={root}>
         <aside
           class={`rail${filtersOpen ? ' open' : ''}`}
           aria-label="Filters"

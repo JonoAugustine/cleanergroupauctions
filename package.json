@@ -2,7 +2,7 @@
   "name": "cleanergroupauctions",
   "description": "A cleaner, faster interface for MyGroupAuctions.com. Not affiliated with MyGroupAuctions.",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "author": "@JonoAugustine",
   "scripts": {

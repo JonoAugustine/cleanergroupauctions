@@ -40,16 +40,12 @@
   font-size: 13px;
 }
 
-/* Two column body: rail, results; the drawer docks as a third column on desktop. */
+/* Two column body: rail, results; the drawer floats over the results. */
 .lots {
   flex: 1;
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   align-items: start;
-}
-
-.lots.has-drawer {
-  grid-template-columns: 240px minmax(0, 1fr) 340px;
 }
 
 .rail {
@@ -459,12 +455,15 @@ mark {
 
 /* Drawer */
 .drawer {
-  position: sticky;
-  top: 0;
-  max-height: 100vh;
+  position: fixed;
+  inset: 12px 12px 12px auto;
+  z-index: 20;
+  width: min(380px, calc(100vw - 24px));
   overflow: auto;
-  border-left: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
   background: var(--surface);
+  box-shadow: 0 24px 48px -12px rgb(0 0 0 / 0.65);
 }
 
 .drawer-bar {
@@ -637,8 +636,7 @@ div.drawer-img {
 
 /* Tablet and phone: filters and lot slide over the results with a scrim. */
 @media (max-width: 1023px) {
-  .lots,
-  .lots.has-drawer {
+  .lots {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -663,15 +661,6 @@ div.drawer-img {
 
   .filters-btn {
     display: inline-flex;
-  }
-
-  .drawer {
-    position: fixed;
-    inset: 0 0 0 auto;
-    z-index: 20;
-    width: min(400px, 92vw);
-    max-height: none;
-    box-shadow: 0 24px 48px -12px rgb(0 0 0 / 0.65);
   }
 
   .scrim {
@@ -748,6 +737,8 @@ div.drawer-img {
     inset: 0;
     width: auto;
     z-index: 25;
+    border: 0;
+    border-radius: 0;
   }
 
   .list-head {
